@@ -1,0 +1,60 @@
+[project]
+name = "kintix-backend"
+version = "0.1.0"
+requires-python = ">=3.12"
+
+# Core runtime: everything needed for the API, ingestion, discovery pipeline,
+# scoring and the risk gate. Deliberately excludes the multi-gigabyte ML stack
+# so that a plain `pip install -e ".[dev]"` is fast and reliable — a failed
+# torch download must never leave the test dependencies uninstalled.
+dependencies = [
+    "fastapi[standard]>=0.115.0",
+    "sqlalchemy>=2.0.36",
+    "asyncpg>=0.30.0",
+    "pydantic-settings>=2.7.0",
+    "alembic>=1.14.0",
+    "httpx",
+    "python-multipart",
+    "numpy>=1.26",
+    # scikit-learn stays in core: without it clustering silently collapses
+    # every process into one, which is worse than a slower install.
+    "scikit-learn>=1.6.0",
+]
+
+[project.optional-dependencies]
+# Test/dev tooling. Install this to run the suite:  pip install -e ".[dev]"
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "aiosqlite>=0.20.0",
+]
+
+# Higher-quality semantic embeddings. Large (pulls torch). Without it the
+# pipeline falls back to deterministic lexical embeddings and still runs.
+ml = [
+    "sentence-transformers>=3.4.0",
+]
+
+# NER-based PII detection. Without it masking falls back to regex, which
+# cannot detect names.
+pii = [
+    "presidio-analyzer>=2.2.355",
+    "presidio-anonymizer>=2.2.355",
+    "spacy>=3.8.0",
+]
+
+# Everything, as installed in the Docker image.
+all = [
+    "kintix-backend[dev,ml,pii]",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["app"]

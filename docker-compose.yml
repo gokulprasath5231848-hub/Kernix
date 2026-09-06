@@ -1,0 +1,57 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: kintix_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-kintix}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-kintix_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-kintix_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kintix} -d ${POSTGRES_DB:-kintix_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: kintix_backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-kintix}:${POSTGRES_PASSWORD:-kintix_secret}@postgres:5432/${POSTGRES_DB:-kintix_db}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      GROQ_MODEL: ${GROQ_MODEL:-openai/gpt-oss-120b}
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: kintix_web
+    restart: unless-stopped
+    volumes:
+      - ./web:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    command: npm run dev -- --host 0.0.0.0
+
+volumes:
+  pgdata:
