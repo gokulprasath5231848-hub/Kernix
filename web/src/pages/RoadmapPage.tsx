@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useProcesses } from '../hooks/useProcesses';
 import { api, APIError } from '../api/client';
-import { RiskClass, RISK_LABELS } from '../constants';
+import { RiskClass, RISK_LABELS, hoursPerMonth, formatMoney, LOADED_HOURLY_RATE } from '../constants';
 import StatCard from '../components/roadmap/StatCard';
 import RiskFilterBar from '../components/roadmap/RiskFilterBar';
 import RoadmapTable from '../components/roadmap/RoadmapTable';
@@ -72,6 +72,18 @@ export default function RoadmapPage() {
   };
 
   const pct = (n: number) => (counts.all > 0 ? (n / counts.all) * 100 : 0);
+
+  // Real KPIs derived from the catalog. "Immediate Yield" = hours reclaimable
+  // from the processes already cleared for automation (Pre-Approved), since
+  // those are the ones a human can green-light now.
+  const immediateHrsPerMonth = (allProcesses || [])
+    .filter((p) => p.score?.risk_decision === RiskClass.PRE_APPROVED)
+    .reduce((sum, p) => sum + hoursPerMonth(p.cases_per_month, p.score.manual_time), 0);
+  const immediateAnnualSavings = immediateHrsPerMonth * 12 * LOADED_HOURLY_RATE;
+  const avgViability =
+    allProcesses && allProcesses.length
+      ? allProcesses.reduce((s, p) => s + (p.score?.value_score || 0), 0) / allProcesses.length
+      : 0;
 
   const handleBatchRun = async () => {
     if (!allProcesses?.length || batchRunning) return;
@@ -218,8 +230,15 @@ export default function RoadmapPage() {
 
       <div className="grid grid-cols-4 gap-space-lg">
         <StatCard label="Evaluated Catalog" value={counts.all.toString()} icon="library_books" />
-        <StatCard label="Immediate Yield" value="1,420" unit="hrs/mo" icon="savings" trend="+$186K / yr" accentColor="border-status-safe" />
-        <StatCard label="Viability Index" value="81.4" unit="/100" icon="speed" />
+        <StatCard
+          label="Immediate Yield"
+          value={Math.round(immediateHrsPerMonth).toLocaleString()}
+          unit="hrs/mo"
+          icon="savings"
+          trend={`+${formatMoney(immediateAnnualSavings)} / yr`}
+          accentColor="border-status-safe"
+        />
+        <StatCard label="Viability Index" value={avgViability.toFixed(1)} unit="/100" icon="speed" />
         <div className="bg-surface-container-low rounded-xl p-space-lg border-t-2 border-outline-variant overflow-hidden">
           <div className="flex justify-between items-start mb-4">
             <span className="text-sm font-medium text-on-surface-variant">Risk Distribution</span>

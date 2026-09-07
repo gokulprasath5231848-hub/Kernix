@@ -3,8 +3,9 @@ import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.database import get_engine, get_sessionmaker, Base
 from app.api import health, processes, blueprints, ingestion, weights, audit
@@ -66,6 +67,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    """Log the traceback (otherwise invisible with uvicorn --reload) and return a
+    JSON body so the frontend can surface a real message instead of an opaque
+    network error."""
+    logger.exception("Unhandled error on %s %s", request.method, request.url.path)
+    return JSONResponse(status_code=500, content={"detail": "Internal server error"})
+
 
 app.include_router(health.router)
 app.include_router(processes.router, prefix="/api")

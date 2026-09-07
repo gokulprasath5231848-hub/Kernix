@@ -3,9 +3,11 @@ import { RiskClass } from '../../constants';
 interface ScoreGaugeProps {
   score: number;
   riskClass: RiskClass;
+  confidence?: number | null;
+  casesPerMonth?: number;
 }
 
-export default function ScoreGauge({ score, riskClass }: ScoreGaugeProps) {
+export default function ScoreGauge({ score, riskClass, confidence, casesPerMonth }: ScoreGaugeProps) {
   const radius = 90;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (score / 100) * circumference;
@@ -48,12 +50,12 @@ export default function ScoreGauge({ score, riskClass }: ScoreGaugeProps) {
 
       <div className="w-full grid grid-cols-3 gap-2 mt-8 z-10 border-t border-outline-variant/30 pt-4">
         <div className="flex flex-col items-center text-center">
-          <span className="text-xs text-on-surface-variant mb-1">Historical</span>
-          <span className="text-sm font-mono text-status-safe flex items-center"><span className="material-symbols-outlined text-[14px]">arrow_upward</span>+4.2</span>
+          <span className="text-xs text-on-surface-variant mb-1">Volume</span>
+          <span className="text-sm font-mono text-on-surface">{casesPerMonth != null ? `${casesPerMonth.toLocaleString()}/mo` : '—'}</span>
         </div>
         <div className="flex flex-col items-center text-center border-l border-r border-outline-variant/30">
           <span className="text-xs text-on-surface-variant mb-1">Confidence</span>
-          <span className="text-sm font-mono text-on-surface">94.8%</span>
+          <span className="text-sm font-mono text-on-surface">{confidence != null ? `${confidence.toFixed(1)}%` : '—'}</span>
         </div>
         <div className="flex flex-col items-center text-center">
           <span className="text-xs text-on-surface-variant mb-1">Class</span>

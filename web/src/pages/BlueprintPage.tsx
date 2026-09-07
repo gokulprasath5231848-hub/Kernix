@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useBlueprint, useProcess } from '../hooks/useProcesses';
-import { submitForApproval } from '../api/client';
+import { submitForApproval, APIError } from '../api/client';
 
 function downloadText(filename: string, content: string, type: string) {
   const blob = new Blob([content], { type });
@@ -30,13 +30,20 @@ export default function BlueprintPage() {
     }
   }, [process, navigate]);
 
+  // The backend returns 403 for a TOO_RISKY blueprint (the risk gate). Redirect
+  // from an effect, never during render, so React isn't asked to update the
+  // router while this component is still rendering.
+  useEffect(() => {
+    if ((error as APIError | null)?.status === 403) {
+      navigate('/');
+    }
+  }, [error, navigate]);
+
   if (isProcessLoading || isBlueprintLoading) return <div className="p-8 flex justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>;
   if (error || !blueprint || !process) {
-    // If API returned 403, TanStack query catches it as error, we can also redirect here
-    if ((error as any)?.status === 403) {
-      navigate('/');
-      return null;
-    }
+    // 403 redirect is handled by the effect above; render nothing while it runs
+    // rather than flashing the generic error.
+    if ((error as APIError | null)?.status === 403) return null;
     return <div className="p-8 text-error">Failed to load blueprint.</div>;
   }
 

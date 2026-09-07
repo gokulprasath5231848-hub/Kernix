@@ -1,4 +1,6 @@
 import { NavLink } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { api } from '../../api/client';
 
 const navItems = [
   { path: '/', label: 'Roadmap', icon: 'view_kanban' },
@@ -9,6 +11,19 @@ const navItems = [
 ];
 
 export default function Sidebar() {
+  // Live backend health: real version, real round-trip latency, real up/down.
+  const { data: health, isError } = useQuery({
+    queryKey: ['health'],
+    queryFn: async () => {
+      const started = performance.now();
+      const res = await api.getHealth();
+      return { ...res, ms: Math.round(performance.now() - started) };
+    },
+    refetchInterval: 15000,
+    retry: false,
+  });
+  const online = !isError && !!health;
+
   return (
     <aside className="fixed top-0 left-0 h-screen w-72 bg-surface-container-low border-r border-outline-variant/30 flex flex-col z-20">
       <div className="p-space-lg flex items-center space-x-3 mt-4">
@@ -54,13 +69,17 @@ export default function Sidebar() {
 
       <div className="p-space-lg border-t border-outline-variant/30 bg-surface-container/20">
         <div className="flex items-center space-x-2 mb-2">
-          <div className="w-2 h-2 rounded-full bg-status-safe animate-pulse"></div>
-          <span className="text-xs text-on-surface-variant font-mono">API v2.4 Connected</span>
-          <span className="text-[10px] bg-status-safe/20 text-status-safe px-1.5 py-0.5 rounded uppercase tracking-wider ml-auto">Live</span>
+          <div className={`w-2 h-2 rounded-full ${online ? 'bg-status-safe animate-pulse' : 'bg-error'}`}></div>
+          <span className="text-xs text-on-surface-variant font-mono">
+            {online ? `API v${health!.version} Connected` : 'API Unreachable'}
+          </span>
+          <span className={`text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wider ml-auto ${online ? 'bg-status-safe/20 text-status-safe' : 'bg-error/20 text-error'}`}>
+            {online ? 'Live' : 'Down'}
+          </span>
         </div>
         <div className="text-[10px] text-on-surface-variant/50 font-mono flex justify-between">
-          <span>FastAPI Backend Live</span>
-          <span>12ms</span>
+          <span>FastAPI Backend {online ? 'Live' : 'Offline'}</span>
+          <span>{online ? `${health!.ms}ms` : '—'}</span>
         </div>
       </div>
     </aside>

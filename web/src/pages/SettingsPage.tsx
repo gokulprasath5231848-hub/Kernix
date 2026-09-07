@@ -13,8 +13,23 @@ export default function SettingsPage() {
     }
   }, [data]);
 
+  // Moving one factor proportionally rebalances the others so the set always
+  // sums to 1.0. Without this the total drifts off 100% and Save stays disabled
+  // until the user manually re-balances every slider by hand.
   const handleWeightChange = (key: string, value: string) => {
-    setWeights(prev => ({ ...prev, [key]: parseFloat(value) / 100 }));
+    const newVal = Math.min(1, Math.max(0, parseFloat(value) / 100));
+    setWeights(prev => {
+      const others = Object.keys(prev).filter(k => k !== key);
+      const remaining = 1 - newVal;
+      const othersSum = others.reduce((s, k) => s + prev[k], 0);
+      const next: Record<string, number> = { ...prev, [key]: newVal };
+      if (othersSum > 0) {
+        others.forEach(k => { next[k] = (prev[k] / othersSum) * remaining; });
+      } else if (others.length) {
+        others.forEach(k => { next[k] = remaining / others.length; });
+      }
+      return next;
+    });
   };
 
   const totalSum = Object.values(weights).reduce((a, b) => a + b, 0);

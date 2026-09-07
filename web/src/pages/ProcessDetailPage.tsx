@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { useProcess, useReevaluate, useWeights } from '../hooks/useProcesses';
-import { RiskClass } from '../constants';
+import { RiskClass, annualHours, annualSavings, formatMoney } from '../constants';
 import ScoreGauge from '../components/score/ScoreGauge';
 import FactorBars from '../components/score/FactorBars';
 import EvidenceTrail from '../components/score/EvidenceTrail';
@@ -17,6 +17,15 @@ export default function ProcessDetailPage() {
   if (isError || !process) return <div className="p-8 text-error">Failed to load process details.</div>;
 
   const isRisky = process.score.risk_decision === RiskClass.TOO_RISKY;
+
+  // Per-process effort/savings, derived from this process's own data.
+  const hoursPerYear = annualHours(process.cases_per_month, process.score.manual_time);
+  const savingsPerYear = annualSavings(process.cases_per_month, process.score.manual_time);
+  // Confidence = mean completeness of the evidence backing this process.
+  const evidence = process.evidence_trail || [];
+  const confidencePct = evidence.length
+    ? (evidence.reduce((s, e) => s + (e.confidence ?? 0), 0) / evidence.length) * 100
+    : null;
 
   const factors = {
     frequency_volume: process.score.frequency_volume,
@@ -70,12 +79,12 @@ export default function ProcessDetailPage() {
       <div className="flex items-center space-x-4 bg-surface-container-low p-4 rounded-xl border border-outline-variant/30 w-fit">
         <div className="flex items-center space-x-2">
           <span className="material-symbols-outlined text-status-safe text-xl">savings</span>
-          <span className="text-lg font-mono font-bold">$348,500<span className="text-xs text-on-surface-variant font-sans">/yr</span></span>
+          <span className="text-lg font-mono font-bold">{formatMoney(savingsPerYear)}<span className="text-xs text-on-surface-variant font-sans">/yr</span></span>
         </div>
         <div className="w-px h-6 bg-outline-variant/50"></div>
         <div className="flex items-center space-x-2">
           <span className="material-symbols-outlined text-primary text-xl">schedule</span>
-          <span className="text-lg font-mono font-bold">1,840<span className="text-xs text-on-surface-variant font-sans"> hrs</span></span>
+          <span className="text-lg font-mono font-bold">{Math.round(hoursPerYear).toLocaleString()}<span className="text-xs text-on-surface-variant font-sans"> hrs/yr</span></span>
         </div>
       </div>
 
@@ -85,7 +94,12 @@ export default function ProcessDetailPage() {
 
       <div className="grid grid-cols-12 gap-space-lg">
         <div className="col-span-5">
-          <ScoreGauge score={process.score.value_score} riskClass={process.score.risk_decision} />
+          <ScoreGauge
+            score={process.score.value_score}
+            riskClass={process.score.risk_decision}
+            confidence={confidencePct}
+            casesPerMonth={process.cases_per_month}
+          />
         </div>
         <div className="col-span-7">
           <FactorBars factors={factors} weights={weightsConfig?.weights || {}} />
