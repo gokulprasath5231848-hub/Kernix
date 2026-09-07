@@ -45,12 +45,15 @@ class Settings(BaseSettings):
 
     @property
     def db_ssl_required(self) -> bool:
-        """Whether the database connection must use SSL. Managed providers
-        require it; local Postgres does not."""
-        url = self.DATABASE_URL.lower()
-        params = dict(parse_qsl(urlsplit(url).query))
-        mode = params.get("sslmode", "")
-        return mode in {"require", "verify-ca", "verify-full"} or ".neon.tech" in url
+        """Whether the database connection must use SSL. An explicit `sslmode`
+        wins; otherwise any non-local host is assumed to be a managed provider
+        (Neon, Supabase, Render, …) that requires SSL, while localhost does not."""
+        parts = urlsplit(self.DATABASE_URL)
+        mode = dict(parse_qsl(parts.query)).get("sslmode", "").lower()
+        if mode:
+            return mode != "disable"
+        host = (parts.hostname or "").lower()
+        return host not in {"localhost", "127.0.0.1", "::1", ""}
 
     @property
     def db_connect_args(self) -> dict:
