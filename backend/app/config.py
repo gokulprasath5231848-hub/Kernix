@@ -21,6 +21,14 @@ class Settings(BaseSettings):
     # Comma-separated list of allowed browser origins for CORS. Defaults to the
     # local dev servers; set to the deployed frontend URL(s) in production.
     CORS_ORIGINS: str = "http://localhost:5173,http://localhost:3000"
+    # Single-operator login. Credentials live here (server-side / env vars), never
+    # in the frontend bundle. Leave AUTH_PASSWORD empty to disable the login gate.
+    AUTH_EMAIL: str = ""
+    AUTH_PASSWORD: str = ""
+    # Secret used to sign session tokens. Set a long random value in production.
+    AUTH_SECRET: str = "kintix-dev-secret-change-me"
+    # Session lifetime in seconds (default 12 hours).
+    AUTH_TOKEN_TTL_SECONDS: int = 43200
 
     @property
     def cors_origins_list(self) -> list[str]:

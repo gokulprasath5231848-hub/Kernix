@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.database import get_engine, get_sessionmaker, Base
-from app.api import health, processes, blueprints, ingestion, weights, audit, catalog
+from app.api import health, processes, blueprints, ingestion, weights, audit, catalog, auth
 from app.seed import seed_database
 from app.config import get_settings
 
@@ -78,6 +78,7 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
 
 
 app.include_router(health.router)
+app.include_router(auth.router, prefix="/api")
 app.include_router(processes.router, prefix="/api")
 app.include_router(blueprints.router, prefix="/api")
 app.include_router(ingestion.router, prefix="/api")

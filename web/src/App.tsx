@@ -1,5 +1,7 @@
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import DashboardLayout from './components/layout/DashboardLayout';
+import RequireAuth from './components/RequireAuth';
+import LoginPage from './pages/LoginPage';
 import RoadmapPage from './pages/RoadmapPage';
 import ProcessDetailPage from './pages/ProcessDetailPage';
 import BlueprintPage from './pages/BlueprintPage';
@@ -10,6 +12,13 @@ import ProcessIntelligencePage from './pages/ProcessIntelligencePage';
 
 const router = createBrowserRouter([
   {
+    path: '/login',
+    element: <LoginPage />,
+  },
+  {
+    element: <RequireAuth />,
+    children: [
+      {
     path: '/',
     element: <DashboardLayout />,
     children: [
@@ -45,6 +54,8 @@ const router = createBrowserRouter([
         path: '*',
         element: <Navigate to="/" replace />,
       }
+    ],
+      },
     ],
   },
 ]);

@@ -7,3 +7,30 @@
   body { overscroll-behavior: none; }
   ::-webkit-scrollbar { display: none; }
 }
+
+/* --- Login page ambience --- */
+.login-telemetry-grid {
+  background-size: 36px 36px;
+  background-image:
+    linear-gradient(to right, rgba(201, 162, 39, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(201, 162, 39, 0.04) 1px, transparent 1px);
+}
+.login-gold-spotlight {
+  background: radial-gradient(circle 650px at 50% 320px, rgba(201, 162, 39, 0.14), transparent 75%);
+}
+.login-logo-mark {
+  background: linear-gradient(135deg, #F3CF5A 0%, #C9A227 50%, #8F6A0F 100%);
+}
+.login-btn-gold {
+  background: linear-gradient(135deg, #F3CF5A 0%, #C9A227 50%, #8F6A0F 100%);
+  box-shadow: 0 0 24px rgba(201, 162, 39, 0.32);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.login-btn-gold:not(:disabled):hover {
+  filter: brightness(1.1);
+  box-shadow: 0 0 32px rgba(236, 194, 70, 0.48);
+  transform: translateY(-1px);
+}
+.login-btn-gold:not(:disabled):active {
+  transform: translateY(0);
+}

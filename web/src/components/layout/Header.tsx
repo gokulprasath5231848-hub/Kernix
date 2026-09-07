@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProcesses } from '../../hooks/useProcesses';
+import { logout } from '../../auth';
 
 export default function Header() {
   const navigate = useNavigate();
@@ -11,6 +12,11 @@ export default function Header() {
   const submitSearch = (e: React.FormEvent) => {
     e.preventDefault();
     navigate(`/?q=${encodeURIComponent(query.trim())}`);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
   };
 
   return (
@@ -43,6 +49,14 @@ export default function Header() {
             </div>
             <div className="w-8 h-8 rounded-full bg-surface-container-high border border-primary/30 flex items-center justify-center text-primary font-semibold">AS</div>
           </div>
+          <button
+            onClick={handleLogout}
+            title="Sign out"
+            aria-label="Sign out"
+            className="text-on-surface-variant hover:text-status-risk transition-colors"
+          >
+            <span className="material-symbols-outlined">logout</span>
+          </button>
         </div>
       </div>
     </header>
