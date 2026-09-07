@@ -1,6 +1,11 @@
 from functools import lru_cache
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# libpq query params that asyncpg does not accept as connect kwargs. They are
+# stripped from the URL; SSL is re-applied via connect_args (see db_connect_args).
+_LIBPQ_ONLY_PARAMS = {"sslmode", "channel_binding"}
 
 class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql+asyncpg://kintix:kintix_secret@localhost:5432/kintix_db"
@@ -23,17 +28,34 @@ class Settings(BaseSettings):
 
     @property
     def async_database_url(self) -> str:
-        """DATABASE_URL normalized to the asyncpg driver. Managed Postgres
-        providers (Railway/Neon/Render) hand out plain `postgresql://` (or
-        `postgres://`) URLs; SQLAlchemy's async engine needs `+asyncpg`."""
+        """DATABASE_URL normalized for SQLAlchemy's asyncpg driver. Managed
+        Postgres providers (Railway/Neon/Render) hand out plain `postgresql://`
+        (or `postgres://`) URLs, and Neon/Render append libpq-only query params
+        (`sslmode`, `channel_binding`) that asyncpg rejects — strip those and
+        re-apply SSL through db_connect_args instead."""
         url = self.DATABASE_URL
-        if url.startswith("postgresql+"):
-            return url
-        if url.startswith("postgresql://"):
-            return url.replace("postgresql://", "postgresql+asyncpg://", 1)
         if url.startswith("postgres://"):
-            return url.replace("postgres://", "postgresql+asyncpg://", 1)
-        return url
+            url = url.replace("postgres://", "postgresql+asyncpg://", 1)
+        elif url.startswith("postgresql://"):
+            url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+
+        parts = urlsplit(url)
+        kept = [(k, v) for k, v in parse_qsl(parts.query) if k not in _LIBPQ_ONLY_PARAMS]
+        return urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(kept), parts.fragment))
+
+    @property
+    def db_ssl_required(self) -> bool:
+        """Whether the database connection must use SSL. Managed providers
+        require it; local Postgres does not."""
+        url = self.DATABASE_URL.lower()
+        params = dict(parse_qsl(urlsplit(url).query))
+        mode = params.get("sslmode", "")
+        return mode in {"require", "verify-ca", "verify-full"} or ".neon.tech" in url
+
+    @property
+    def db_connect_args(self) -> dict:
+        """Extra kwargs for create_async_engine — passed through to asyncpg."""
+        return {"ssl": True} if self.db_ssl_required else {}
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

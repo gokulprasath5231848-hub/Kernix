@@ -30,6 +30,7 @@ def get_engine() -> AsyncEngine:
             settings.async_database_url,
             pool_pre_ping=True,
             echo=settings.DEBUG,
+            connect_args=settings.db_connect_args,
         )
     return _engine
 
