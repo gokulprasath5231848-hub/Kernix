@@ -80,3 +80,52 @@ export interface AuditEntry {
   detail: string;
   timestamp: string;
 }
+
+// ---------------------------------------------------------------------------
+// Automation Blueprints catalog
+// ---------------------------------------------------------------------------
+
+export interface BlueprintCatalogItem {
+  process_id: string;
+  process_name: string;
+  department: string | null;
+  risk_decision: RiskClass;
+  value_score: number;
+  blueprint_id: string | null;
+  generated_at: string | null;
+  estimated_savings_hours: number | null;
+  status: 'Blocked' | 'Not Generated' | 'Draft' | 'Awaiting Approval';
+}
+
+// ---------------------------------------------------------------------------
+// Process Intelligence (process mining)
+// ---------------------------------------------------------------------------
+
+export interface FlowNode {
+  activity: string;
+  count: number;
+  avg_minutes: number;
+  systems: string[];
+}
+
+export interface FlowEdge {
+  source: string;
+  target: string;
+  count: number;
+}
+
+export interface FlowVariant {
+  sequence: string[];
+  case_count: number;
+  pct: number;
+}
+
+export interface ProcessIntelligence {
+  process_id: string;
+  name: string;
+  case_count: number;
+  nodes: FlowNode[];
+  edges: FlowEdge[];
+  variants: FlowVariant[];
+  rework_rate: number;
+}

@@ -96,3 +96,49 @@ class AuditLogResponse(BaseModel):
     detail: Optional[str]
     timestamp: datetime.datetime
     model_config = ConfigDict(from_attributes=True)
+
+
+# ---------------------------------------------------------------------------
+# Automation Blueprints catalog
+# ---------------------------------------------------------------------------
+
+class BlueprintCatalogItem(BaseModel):
+    process_id: uuid.UUID
+    process_name: str
+    department: Optional[str]
+    risk_decision: RiskDecision
+    value_score: float
+    blueprint_id: Optional[uuid.UUID] = None
+    generated_at: Optional[datetime.datetime] = None
+    estimated_savings_hours: Optional[float] = None
+    status: str   # "Blocked" | "Not Generated" | "Draft" | "Awaiting Approval"
+
+
+# ---------------------------------------------------------------------------
+# Process Intelligence (process mining)
+# ---------------------------------------------------------------------------
+
+class FlowNode(BaseModel):
+    activity: str
+    count: int
+    avg_minutes: float
+    systems: List[str]
+
+class FlowEdge(BaseModel):
+    source: str
+    target: str
+    count: int
+
+class FlowVariant(BaseModel):
+    sequence: List[str]
+    case_count: int
+    pct: float
+
+class ProcessIntelligence(BaseModel):
+    process_id: uuid.UUID
+    name: str
+    case_count: int
+    nodes: List[FlowNode]
+    edges: List[FlowEdge]
+    variants: List[FlowVariant]
+    rework_rate: float

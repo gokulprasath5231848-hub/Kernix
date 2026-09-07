@@ -1,4 +1,4 @@
-import { ProcessDetail, ProcessListItem, Blueprint, Score, WeightsConfig, AuditEntry } from '../types';
+import { ProcessDetail, ProcessListItem, Blueprint, Score, WeightsConfig, AuditEntry, BlueprintCatalogItem, ProcessIntelligence } from '../types';
 
 interface ProcessListResponse {
   items: ProcessListItem[];
@@ -98,6 +98,13 @@ export const api = {
       body: formData,
     });
   },
+  // --- Blueprints catalog ---
+  getBlueprintsCatalog: () => fetchAPI<BlueprintCatalogItem[]>('/api/blueprints'),
+  generateBlueprint: (processId: string) =>
+    fetchAPI<Blueprint>(`/api/processes/${processId}/blueprint/generate`, { method: 'POST' }),
+  // --- Process Intelligence ---
+  getProcessIntelligence: (processId: string) =>
+    fetchAPI<ProcessIntelligence>(`/api/processes/${processId}/intelligence`),
 };
 
 

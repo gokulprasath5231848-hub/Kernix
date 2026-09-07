@@ -5,6 +5,8 @@ import ProcessDetailPage from './pages/ProcessDetailPage';
 import BlueprintPage from './pages/BlueprintPage';
 import SettingsPage from './pages/SettingsPage';
 import AuditPage from './pages/AuditPage';
+import BlueprintsPage from './pages/BlueprintsPage';
+import ProcessIntelligencePage from './pages/ProcessIntelligencePage';
 
 const router = createBrowserRouter([
   {
@@ -33,11 +35,11 @@ const router = createBrowserRouter([
       },
       {
         path: 'process-intelligence',
-        element: <div className="p-8">Process Intelligence Coming Soon</div>,
+        element: <ProcessIntelligencePage />,
       },
       {
         path: 'blueprints',
-        element: <div className="p-8">All Blueprints Coming Soon</div>,
+        element: <BlueprintsPage />,
       },
       {
         path: '*',

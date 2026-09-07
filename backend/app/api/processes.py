@@ -2,15 +2,21 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from typing import Optional
+from collections import Counter, defaultdict
 import datetime
+import statistics
 import uuid
 
 from app.database import get_db_session
 from app.models import Process, Event, Score, ScoringWeights, AuditLog
-from app.schemas import ProcessListResponse, ProcessDetail, ProcessListItem
+from app.schemas import (
+    ProcessListResponse, ProcessDetail, ProcessListItem,
+    ProcessIntelligence, FlowNode, FlowEdge, FlowVariant,
+)
 from app.constants import RiskDecision, SCORING_WEIGHTS
 from app.scoring.engine import compute_value_score
 from app.scoring.risk_gate import evaluate_risk
+from app.pipeline.metrics import REWORK_MARKERS
 
 router = APIRouter(prefix="/processes", tags=["processes"])
 
@@ -125,3 +131,137 @@ async def reevaluate_process(process_id: uuid.UUID, db: AsyncSession = Depends(g
         "risk_decision": decision.value,
         "reason": reason,
     }
+
+
+# ---------------------------------------------------------------------------
+# Process Intelligence — trace-based process mining
+# ---------------------------------------------------------------------------
+
+@router.get("/{process_id}/intelligence", response_model=ProcessIntelligence)
+async def get_process_intelligence(
+    process_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db_session),
+):
+    """Compute flow graph, path variants, and bottlenecks from events."""
+
+    process = (
+        await db.execute(select(Process).where(Process.id == process_id))
+    ).scalar_one_or_none()
+    if not process:
+        raise HTTPException(status_code=404, detail="Process not found")
+
+    events = (
+        await db.execute(
+            select(Event)
+            .where(Event.process_id == process_id)
+            .order_by(Event.event_time)
+        )
+    ).scalars().all()
+
+    if not events:
+        return ProcessIntelligence(
+            process_id=process.id,
+            name=process.name,
+            case_count=0,
+            nodes=[],
+            edges=[],
+            variants=[],
+            rework_rate=0.0,
+        )
+
+    # --- group events by case, sort by time --------------------------------
+    cases: dict[str, list] = defaultdict(list)
+    for e in events:
+        cases[e.case_id].append(e)
+
+    traces: list[tuple[str, ...]] = []
+    # Per-activity aggregation buckets
+    activity_count: Counter = Counter()
+    activity_durations: dict[str, list[float]] = defaultdict(list)
+    activity_systems: dict[str, set[str]] = defaultdict(set)
+    edge_count: Counter = Counter()
+    reworked = 0
+
+    for case_events in cases.values():
+        case_events.sort(key=lambda ev: (ev.event_time is None, ev.event_time))
+
+        # Build deduped trace (same consecutive-repeat logic as orchestrator)
+        steps: list[str] = []
+        for ev in case_events:
+            label = (ev.activity_normalised or ev.activity_raw or "").strip()
+            if label and (not steps or steps[-1] != label):
+                steps.append(label)
+
+        if not steps:
+            continue
+
+        traces.append(tuple(steps))
+
+        # Node stats
+        for i, ev in enumerate(case_events):
+            label = (ev.activity_normalised or ev.activity_raw or "").strip()
+            if not label:
+                continue
+            activity_count[label] += 1
+            if ev.system:
+                activity_systems[label].add(ev.system)
+            # Duration = Δ to next event in the same case
+            if i + 1 < len(case_events) and ev.event_time and case_events[i + 1].event_time:
+                delta_min = (case_events[i + 1].event_time - ev.event_time).total_seconds() / 60.0
+                if delta_min >= 0:
+                    activity_durations[label].append(delta_min)
+
+        # Edge stats (on deduped trace)
+        for a, b in zip(steps, steps[1:]):
+            edge_count[(a, b)] += 1
+
+        # Rework detection (same logic as metrics.py)
+        labels = [(ev.activity_normalised or "").lower() for ev in case_events]
+        if any(any(m in lab for m in REWORK_MARKERS) for lab in labels):
+            reworked += 1
+        elif len(labels) != len(set(labels)):
+            reworked += 1
+
+    case_count = len(traces)
+    rework_rate = round(reworked / case_count, 3) if case_count else 0.0
+
+    # --- assemble nodes ----------------------------------------------------
+    nodes = [
+        FlowNode(
+            activity=act,
+            count=cnt,
+            avg_minutes=round(
+                statistics.mean(activity_durations[act]), 1
+            ) if activity_durations.get(act) else 0.0,
+            systems=sorted(activity_systems.get(act, set())),
+        )
+        for act, cnt in activity_count.most_common()
+    ]
+
+    # --- assemble edges ----------------------------------------------------
+    edges = [
+        FlowEdge(source=src, target=tgt, count=cnt)
+        for (src, tgt), cnt in edge_count.most_common()
+    ]
+
+    # --- assemble variants (top 20) ----------------------------------------
+    variant_counter = Counter(traces)
+    variants = [
+        FlowVariant(
+            sequence=list(seq),
+            case_count=cnt,
+            pct=round(cnt / case_count * 100, 1),
+        )
+        for seq, cnt in variant_counter.most_common(20)
+    ]
+
+    return ProcessIntelligence(
+        process_id=process.id,
+        name=process.name,
+        case_count=case_count,
+        nodes=nodes,
+        edges=edges,
+        variants=variants,
+        rework_rate=rework_rate,
+    )
+

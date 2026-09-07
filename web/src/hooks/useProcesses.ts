@@ -49,3 +49,49 @@ export const useReevaluate = () => {
     },
   });
 };
+
+
+// ---------------------------------------------------------------------------
+// Automation Blueprints catalog
+// ---------------------------------------------------------------------------
+
+export const useBlueprintsCatalog = () => {
+  return useQuery({
+    queryKey: ['blueprints'],
+    queryFn: () => api.getBlueprintsCatalog(),
+  });
+};
+
+export const useGenerateBlueprint = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (processId: string) => api.generateBlueprint(processId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blueprints'] });
+    },
+  });
+};
+
+export const useSubmitForApproval = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (processId: string) => api.submitForApproval(processId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blueprints'] });
+      queryClient.invalidateQueries({ queryKey: ['audit'] });
+    },
+  });
+};
+
+
+// ---------------------------------------------------------------------------
+// Process Intelligence
+// ---------------------------------------------------------------------------
+
+export const useProcessIntelligence = (processId?: string) => {
+  return useQuery({
+    queryKey: ['intelligence', processId],
+    queryFn: () => processId ? api.getProcessIntelligence(processId) : Promise.reject('No ID'),
+    enabled: !!processId,
+  });
+};
