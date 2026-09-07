@@ -13,13 +13,19 @@ COPY pyproject.toml ./
 # IMPORTANT: pip install . needs the app package to exist
 COPY app ./app
 
-# Install the full stack (ML + PII extras) for the running service.
-# Extras are explicit so a failure here is loud, not a silently degraded image.
+# Which optional extras to install. Default is core-only so the image fits on
+# small/free hosts (e.g. Render free, 512 MB) — the app degrades gracefully:
+# lexical embeddings instead of sentence-transformers, regex instead of Presidio.
+# For a full-featured image on a larger host, build with:
+#   --build-arg PIP_EXTRAS=".[ml,pii]"
+ARG PIP_EXTRAS="."
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir ".[ml,pii]"
+    && pip install --no-cache-dir "${PIP_EXTRAS}"
 
-# spaCy model for Presidio's NER-based PII detection
-RUN python -m spacy download en_core_web_sm
+# spaCy's NER model is only useful when Presidio (the pii extra) is installed.
+RUN python -c "import importlib.util,sys; sys.exit(0 if importlib.util.find_spec('presidio_analyzer') else 1)" \
+    && python -m spacy download en_core_web_sm \
+    || echo "Presidio not installed; skipping spaCy model download (regex PII fallback)."
 
 # Copy remaining backend files
 COPY . .
