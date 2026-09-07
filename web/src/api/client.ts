@@ -5,6 +5,26 @@ interface ProcessListResponse {
   total_count: number;
 }
 
+export interface IngestDiscoveryProcess {
+  id: string;
+  name: string;
+  value_score: number;
+  risk_decision: string;
+}
+
+export interface IngestDiscovery {
+  events_considered: number;
+  clusters_found: number;
+  processes_created: number;
+  processes: IngestDiscoveryProcess[];
+}
+
+export interface IngestResult {
+  message: string;
+  events_ingested: number;
+  discovery?: IngestDiscovery;
+}
+
 const BASE_URL = import.meta.env.VITE_API_URL || '';
 
 export class APIError extends Error {
@@ -73,7 +93,7 @@ export const api = {
   ingest: (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
-    return fetchAPI<{ message: string; events_ingested: number; discovery?: object }>('/api/ingest', {
+    return fetchAPI<IngestResult>('/api/ingest', {
       method: 'POST',
       body: formData,
     });

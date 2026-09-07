@@ -103,7 +103,10 @@ async def reevaluate_process(process_id: uuid.UUID, db: AsyncSession = Depends(g
     score.value_score = new_value_score
     score.risk_decision = decision.value
     score.reason = reason
-    score.scored_at = datetime.datetime.now(datetime.timezone.utc)
+    # scores.scored_at is TIMESTAMP WITHOUT TIME ZONE, so store a naive UTC value.
+    # A tz-aware datetime here makes asyncpg raise "can't subtract offset-naive
+    # and offset-aware datetimes" and the endpoint 500s.
+    score.scored_at = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
     if weights_row:
         score.weights_id = weights_row.id
 

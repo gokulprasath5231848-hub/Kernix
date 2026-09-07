@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useProcesses } from '../../hooks/useProcesses';
 
 export default function Header() {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
+  const { data: processes } = useProcesses();
+  const evaluatedCount = processes?.length ?? 0;
 
   const submitSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,7 +19,7 @@ export default function Header() {
         <div className="flex items-center space-x-2 bg-surface-container px-3 py-1.5 rounded-lg border border-outline-variant/50">
           <span className="material-symbols-outlined text-sm text-primary">sync</span>
           <span className="text-xs text-on-surface-variant">Nightly Audit: Synced 04:00 AM UTC</span>
-          <span className="text-xs text-on-surface font-medium ml-2 border-l border-outline-variant/50 pl-2">48 Processes Evaluated</span>
+          <span className="text-xs text-on-surface font-medium ml-2 border-l border-outline-variant/50 pl-2">{evaluatedCount} Processes Evaluated</span>
         </div>
       </div>
       <div className="flex items-center space-x-6">

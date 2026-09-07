@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { useProcesses } from '../hooks/useProcesses';
-import { api } from '../api/client';
-import { RiskClass } from '../constants';
+import { api, APIError } from '../api/client';
+import { RiskClass, RISK_LABELS } from '../constants';
 import StatCard from '../components/roadmap/StatCard';
 import RiskFilterBar from '../components/roadmap/RiskFilterBar';
 import RoadmapTable from '../components/roadmap/RoadmapTable';
@@ -23,6 +24,16 @@ export default function RoadmapPage() {
   const [sort, setSort] = useState<'value_score' | 'frequency'>('value_score');
   const [batchRunning, setBatchRunning] = useState(false);
   const [batchMessage, setBatchMessage] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const [ingestResult, setIngestResult] = useState<{
+    message: string;
+    events: number;
+    processes: number;
+    risk: Record<string, number>;
+  } | null>(null);
+  const [ingestError, setIngestError] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const search = (searchParams.get('q') || '').trim().toLowerCase();
@@ -73,6 +84,45 @@ export default function RoadmapPage() {
     setBatchRunning(false);
   };
 
+  const handleUploadClick = () => fileInputRef.current?.click();
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    // Reset the input so selecting the same file again still fires onChange.
+    e.target.value = '';
+    if (!file || uploading) return;
+
+    setUploading(true);
+    setIngestError('');
+    setIngestResult(null);
+    try {
+      const res = await api.ingest(file);
+      const discovered = res.discovery?.processes ?? [];
+      const risk: Record<string, number> = {};
+      for (const p of discovered) {
+        risk[p.risk_decision] = (risk[p.risk_decision] || 0) + 1;
+      }
+      setIngestResult({
+        message: res.message,
+        events: res.events_ingested,
+        processes: res.discovery?.processes_created ?? 0,
+        risk,
+      });
+      // Re-fetch the roadmap so the newly discovered processes appear at once.
+      await queryClient.invalidateQueries({ queryKey: ['processes'] });
+    } catch (err) {
+      const detail =
+        err instanceof APIError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : 'Upload failed. Please try again.';
+      setIngestError(detail);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const exportCSV = () => {
     const header = ['rank', 'process', 'department', 'cases_per_month', 'viability_score', 'risk'];
     const rows = visibleProcesses.map(p => [
@@ -98,6 +148,21 @@ export default function RoadmapPage() {
           {batchMessage && <p className="text-xs text-primary mt-2">{batchMessage}</p>}
         </div>
         <div className="flex space-x-3">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,text/csv"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+          <button
+            onClick={handleUploadClick}
+            disabled={uploading}
+            className="px-4 py-2 rounded-lg bg-surface-container-high border border-outline-variant/30 text-sm font-medium hover:bg-surface-container-highest transition-colors flex items-center space-x-2 disabled:opacity-60"
+          >
+            <span className={`material-symbols-outlined text-[18px] ${uploading ? 'animate-spin' : ''}`}>{uploading ? 'sync' : 'upload_file'}</span>
+            <span>{uploading ? 'Uploading…' : 'Upload CSV'}</span>
+          </button>
           <button
             onClick={() => navigate('/settings')}
             className="px-4 py-2 rounded-lg bg-surface-container-high border border-outline-variant/30 text-sm font-medium hover:bg-surface-container-highest transition-colors flex items-center space-x-2"
@@ -115,6 +180,41 @@ export default function RoadmapPage() {
           </button>
         </div>
       </div>
+
+      {(ingestResult || ingestError) && (
+        <div
+          className={`rounded-xl border px-4 py-3 flex items-start justify-between text-sm ${
+            ingestError
+              ? 'bg-rose-950/30 border-error/40 text-rose-300'
+              : 'bg-surface-container-low border-status-safe/40 text-on-surface'
+          }`}
+        >
+          <div className="flex items-start space-x-2">
+            <span className="material-symbols-outlined text-[18px]">{ingestError ? 'error' : 'check_circle'}</span>
+            {ingestError ? (
+              <span>Upload failed: {ingestError}</span>
+            ) : (
+              <div>
+                <span className="font-medium">{ingestResult!.message}</span>
+                <div className="text-xs text-on-surface-variant mt-1 flex flex-wrap gap-x-4 gap-y-1">
+                  <span>{ingestResult!.events} events ingested</span>
+                  <span>{ingestResult!.processes} process(es) discovered</span>
+                  {Object.entries(ingestResult!.risk).map(([rc, n]) => (
+                    <span key={rc}>{RISK_LABELS[rc as RiskClass] ?? rc}: {n}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+          <button
+            onClick={() => { setIngestResult(null); setIngestError(''); }}
+            className="text-on-surface-variant hover:text-on-surface transition-colors"
+            aria-label="Dismiss"
+          >
+            <span className="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+      )}
 
       <div className="grid grid-cols-4 gap-space-lg">
         <StatCard label="Evaluated Catalog" value={counts.all.toString()} icon="library_books" />
