@@ -16,7 +16,7 @@ export default function RiskFilterBar({ activeFilter, onFilterChange, counts }: 
     <div className="flex items-center space-x-2 bg-surface-container-low p-2 rounded-xl border border-outline-variant/30 w-fit">
       <button
         onClick={() => onFilterChange('ALL')}
-        className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2 ${
+        className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2 flex-none whitespace-nowrap ${
           activeFilter === 'ALL'
             ? 'bg-primary text-on-primary'
             : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container'
@@ -28,7 +28,7 @@ export default function RiskFilterBar({ activeFilter, onFilterChange, counts }: 
         </span>
       </button>
 
-      <div className="w-px h-6 bg-outline-variant/50 mx-1"></div>
+      <div className="w-px h-6 bg-outline-variant/50 mx-1 flex-none"></div>
 
       {[RiskClass.PRE_APPROVED, RiskClass.HUMAN_IN_THE_LOOP, RiskClass.TOO_RISKY].map((rc) => {
         const isActive = activeFilter === rc;
@@ -42,7 +42,7 @@ export default function RiskFilterBar({ activeFilter, onFilterChange, counts }: 
           <button
             key={rc}
             onClick={() => onFilterChange(rc)}
-            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2 ${
+            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2 flex-none whitespace-nowrap ${
               isActive
                 ? 'bg-surface-container-high text-on-surface border border-outline-variant/50'
                 : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container border border-transparent'

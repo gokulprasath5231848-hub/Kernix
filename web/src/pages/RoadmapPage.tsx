@@ -7,6 +7,7 @@ import { RiskClass, RISK_LABELS, hoursPerMonth, formatMoney, LOADED_HOURLY_RATE 
 import StatCard from '../components/roadmap/StatCard';
 import RiskFilterBar from '../components/roadmap/RiskFilterBar';
 import RoadmapTable from '../components/roadmap/RoadmapTable';
+import RoadmapCards from '../components/roadmap/RoadmapCards';
 
 function downloadFile(filename: string, content: string, type: string) {
   const blob = new Blob([content], { type });
@@ -153,13 +154,13 @@ export default function RoadmapPage() {
 
   return (
     <div className="space-y-space-2xl">
-      <div className="flex justify-between items-end">
+      <div className="flex flex-col gap-space-lg md:flex-row md:justify-between md:items-end">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight mb-2">Automation Opportunity Roadmap</h1>
-          <p className="text-on-surface-variant">Continuous telemetry evaluated against enterprise risk constraints.</p>{search && <p className="text-xs text-primary mt-2">Search: “{searchParams.get('q')}”</p>}
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-2">Automation Opportunity Roadmap</h1>
+          <p className="text-on-surface-variant text-sm md:text-base">Continuous telemetry evaluated against enterprise risk constraints.</p>{search && <p className="text-xs text-primary mt-2">Search: “{searchParams.get('q')}”</p>}
           {batchMessage && <p className="text-xs text-primary mt-2">{batchMessage}</p>}
         </div>
-        <div className="flex space-x-3">
+        <div className="flex flex-wrap gap-2 md:space-x-3">
           <input
             ref={fileInputRef}
             type="file"
@@ -228,7 +229,7 @@ export default function RoadmapPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-4 gap-space-lg">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-space-md md:gap-space-lg">
         <StatCard label="Evaluated Catalog" value={counts.all.toString()} icon="library_books" />
         <StatCard
           label="Immediate Yield"
@@ -257,15 +258,17 @@ export default function RoadmapPage() {
         </div>
       </div>
 
-      <div className="flex justify-between items-center">
-        <RiskFilterBar activeFilter={activeFilter} onFilterChange={setActiveFilter} counts={counts} />
-        <div className="flex space-x-3">
+      <div className="flex flex-col gap-space-md lg:flex-row lg:justify-between lg:items-center">
+        <div className="-mx-gutter-mobile px-gutter-mobile md:mx-0 md:px-0 overflow-x-auto">
+          <RiskFilterBar activeFilter={activeFilter} onFilterChange={setActiveFilter} counts={counts} />
+        </div>
+        <div className="flex gap-2 md:space-x-3">
           <select value={department} onChange={e => setDepartment(e.target.value)}
-            className="px-3 py-1.5 rounded-lg border border-outline-variant/30 text-sm text-on-surface-variant bg-surface-container-low">
+            className="flex-1 lg:flex-none px-3 py-1.5 rounded-lg border border-outline-variant/30 text-sm text-on-surface-variant bg-surface-container-low">
             {departments.map(d => <option key={d} value={d}>Department: {d}</option>)}
           </select>
           <select value={sort} onChange={e => setSort(e.target.value as 'value_score' | 'frequency')}
-            className="px-3 py-1.5 rounded-lg border border-outline-variant/30 text-sm text-on-surface-variant bg-surface-container-low">
+            className="flex-1 lg:flex-none px-3 py-1.5 rounded-lg border border-outline-variant/30 text-sm text-on-surface-variant bg-surface-container-low">
             <option value="value_score">Viability (Desc)</option>
             <option value="frequency">Frequency (Desc)</option>
           </select>
@@ -279,7 +282,14 @@ export default function RoadmapPage() {
       ) : isError || allError ? (
         <div className="h-64 flex items-center justify-center bg-surface-container-low rounded-xl border border-error/30 text-error">Error loading processes.</div>
       ) : (
-        <RoadmapTable processes={visibleProcesses} onInspect={handleInspect} onAudit={handleAudit} />
+        <>
+          <div className="hidden md:block">
+            <RoadmapTable processes={visibleProcesses} onInspect={handleInspect} onAudit={handleAudit} />
+          </div>
+          <div className="md:hidden">
+            <RoadmapCards processes={visibleProcesses} onInspect={handleInspect} onAudit={handleAudit} />
+          </div>
+        </>
       )}
 
       <div className="flex justify-between items-center text-sm text-on-surface-variant pt-4 border-t border-outline-variant/20">

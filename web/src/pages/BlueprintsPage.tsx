@@ -121,13 +121,13 @@ export default function BlueprintsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-surface-container-low rounded-xl border border-outline-variant/30 overflow-hidden">
+      <div className="bg-surface-container-low rounded-xl border border-outline-variant/30 overflow-x-auto">
         {isLoading ? (
           <div className="p-12 flex justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>
         ) : isError ? (
           <div className="p-12 text-center text-error">Failed to load blueprint catalog.</div>
         ) : (
-          <table className="w-full text-left text-sm">
+          <table className="w-full min-w-[680px] text-left text-sm">
             <thead className="bg-surface-container/50 border-b border-outline-variant/30">
               <tr>
                 <th className="px-6 py-4 font-semibold text-on-surface-variant uppercase text-xs">Process</th>

@@ -111,7 +111,7 @@ export default function ProcessDetailPage() {
           <span className="material-symbols-outlined text-on-surface-variant">dns</span>
           <span>Connected Infrastructure</span>
         </h3>
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {process.systems.map(sys => (
             <div key={sys} className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/30 flex justify-between items-center group hover:bg-surface-container transition-colors cursor-pointer">
               <div className="flex items-center space-x-3">

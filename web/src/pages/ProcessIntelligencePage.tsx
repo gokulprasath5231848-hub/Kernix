@@ -200,14 +200,14 @@ export default function ProcessIntelligencePage() {
           </div>
 
           {/* All nodes table */}
-          <div className="bg-surface-container-low rounded-xl border border-outline-variant/30 overflow-hidden">
+          <div className="bg-surface-container-low rounded-xl border border-outline-variant/30 overflow-x-auto">
             <div className="px-6 py-4 border-b border-outline-variant/30">
               <h2 className="text-sm font-semibold text-on-surface-variant uppercase tracking-wider flex items-center space-x-2">
                 <span className="material-symbols-outlined text-[18px]">list</span>
                 <span>All Activities</span>
               </h2>
             </div>
-            <table className="w-full text-left text-sm">
+            <table className="w-full min-w-[560px] text-left text-sm">
               <thead className="bg-surface-container/50 border-b border-outline-variant/30">
                 <tr>
                   <th className="px-6 py-3 font-semibold text-on-surface-variant uppercase text-xs">Activity</th>

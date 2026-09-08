@@ -25,7 +25,7 @@ export default function Sidebar() {
   const online = !isError && !!health;
 
   return (
-    <aside className="fixed top-0 left-0 h-screen w-72 bg-surface-container-low border-r border-outline-variant/30 flex flex-col z-20">
+    <aside className="hidden md:flex fixed top-0 left-0 h-screen w-72 bg-surface-container-low border-r border-outline-variant/30 flex-col z-20">
       <div className="p-space-lg flex items-center space-x-3 mt-4">
         <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center border border-primary/20">
           <span className="text-primary font-bold text-xl leading-none">K</span>
