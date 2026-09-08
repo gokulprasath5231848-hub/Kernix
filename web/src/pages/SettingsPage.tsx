@@ -1,11 +1,32 @@
 import { useState, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useWeights } from '../hooks/useProcesses';
 import { api } from '../api/client';
 
 export default function SettingsPage() {
+  const queryClient = useQueryClient();
   const { data, isLoading } = useWeights();
   const [weights, setWeights] = useState<Record<string, number>>({});
   const [isSaving, setIsSaving] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+
+  const handleReset = async () => {
+    const ok = window.confirm(
+      'This permanently clears ALL processes, uploaded work logs, scores, blueprints and audit entries. This cannot be undone. Continue?'
+    );
+    if (!ok) return;
+    setIsResetting(true);
+    try {
+      const res = await api.resetAllData();
+      // Refresh every cached query so the dashboard shows the empty state.
+      await queryClient.invalidateQueries();
+      alert(res.message || 'All data cleared.');
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Failed to reset data.');
+    } finally {
+      setIsResetting(false);
+    }
+  };
 
   useEffect(() => {
     if (data?.weights) {
@@ -94,6 +115,21 @@ export default function SettingsPage() {
       <div className="bg-surface-container-low rounded-xl p-6 border border-outline-variant/30">
         <h3 className="text-lg font-semibold mb-4">Version History</h3>
         <div className="text-sm text-on-surface-variant italic">No previous versions found.</div>
+      </div>
+
+      <div className="bg-surface-container-low rounded-xl p-6 border border-error/40">
+        <h3 className="text-lg font-semibold mb-1 text-error">Danger Zone</h3>
+        <p className="text-sm text-on-surface-variant mb-4">
+          Clear all processes and uploaded work logs to return the console to an empty state.
+          Upload a new work log to repopulate it. This cannot be undone.
+        </p>
+        <button
+          onClick={handleReset}
+          disabled={isResetting}
+          className="px-6 py-2 bg-error text-on-error rounded-lg font-bold disabled:opacity-50 hover:bg-error/90 transition-colors"
+        >
+          {isResetting ? 'Clearing…' : 'Reset all data'}
+        </button>
       </div>
     </div>
   );

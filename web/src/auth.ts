@@ -67,3 +67,11 @@ export function getUserEmail(): string | null {
     return null;
   }
 }
+
+export function getToken(): string | null {
+  try {
+    return localStorage.getItem(TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}

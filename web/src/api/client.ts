@@ -1,4 +1,5 @@
 import { ProcessDetail, ProcessListItem, Blueprint, Score, WeightsConfig, AuditEntry, BlueprintCatalogItem, ProcessIntelligence } from '../types';
+import { getToken } from '../auth';
 
 interface ProcessListResponse {
   items: ProcessListItem[];
@@ -105,6 +106,14 @@ export const api = {
   // --- Process Intelligence ---
   getProcessIntelligence: (processId: string) =>
     fetchAPI<ProcessIntelligence>(`/api/processes/${processId}/intelligence`),
+  // --- Admin: clear all ingested data (requires a valid session) ---
+  resetAllData: () => {
+    const token = getToken();
+    return fetchAPI<{ status: string; message: string }>('/api/admin/reset', {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+  },
 };
 
 
