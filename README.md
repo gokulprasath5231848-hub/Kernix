@@ -4,6 +4,12 @@
 
 KINTIX analyzes fragmented organizational work data to discover recurring workflows, measure effort, score automation potential, and design human-gated blueprints.
 
+## Try prototype
+```bash
+url:https://kintixautomation.netlify.app
+email:test@email.com
+password:shysarGP2025
+```
 ## Quick Start
 
 ```bash
