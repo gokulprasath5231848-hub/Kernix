@@ -47,7 +47,7 @@ export default function ProcessIntelligencePage() {
             value={effectiveId}
             onChange={(e) => setSelectedId(e.target.value)}
             disabled={loadingProcesses}
-            className="bg-surface-container border border-outline-variant/30 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-primary min-w-[280px]"
+            className="w-full sm:w-auto bg-surface-container border border-outline-variant/30 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-primary sm:min-w-[280px]"
           >
             {loadingProcesses && <option>Loading…</option>}
             {processes?.map(p => (

@@ -39,11 +39,11 @@ export default function MilestoneStepper({ currentStep }: MilestoneStepperProps)
                 <span className="text-sm font-bold font-mono">{step.num}</span>
               )}
             </div>
-            <div className="absolute top-12 text-center w-32 -ml-16 left-1/2">
-              <div className={`text-xs font-bold uppercase tracking-wider mb-1 ${
+            <div className="absolute top-12 text-center w-16 -ml-8 md:w-32 md:-ml-16 left-1/2">
+              <div className={`text-[10px] md:text-xs font-bold uppercase tracking-wider mb-1 leading-tight ${
                 isActive ? 'text-primary' : isCompleted ? 'text-on-surface' : 'text-on-surface-variant/50'
               }`}>{step.label}</div>
-              <div className="text-[10px] text-on-surface-variant leading-tight">{step.desc}</div>
+              <div className="hidden md:block text-[10px] text-on-surface-variant leading-tight">{step.desc}</div>
             </div>
           </div>
         );

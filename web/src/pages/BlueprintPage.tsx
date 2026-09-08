@@ -71,15 +71,15 @@ export default function BlueprintPage() {
       </div>
 
       {/* Header */}
-      <div className="flex justify-between items-end">
+      <div className="flex flex-col gap-4 lg:flex-row lg:justify-between lg:items-end">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight mb-2">Automated Execution Blueprint</h1>
-          <div className="flex items-center space-x-4">
-            <span className="text-on-surface-variant text-sm border-r border-outline-variant/30 pr-4">Generated {new Date(blueprint.generated_at).toLocaleString()}</span>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-2">Automated Execution Blueprint</h1>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <span className="text-on-surface-variant text-sm md:border-r border-outline-variant/30 md:pr-4">Generated {new Date(blueprint.generated_at).toLocaleString()}</span>
             <span className="text-sm font-mono text-primary flex items-center space-x-1"><span className="material-symbols-outlined text-[16px]">bolt</span><span>v1.0.0-rc.2</span></span>
           </div>
         </div>
-        <div className="flex space-x-3">
+        <div className="flex flex-wrap gap-2 lg:space-x-3">
           <button
             onClick={() => {
               const code = `# KINTIX generated blueprint: ${process.name}\n# Human approval is required before execution.\n\nBLUEPRINT = ${JSON.stringify(blueprint, null, 2)}\n`;

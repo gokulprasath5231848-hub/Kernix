@@ -39,23 +39,23 @@ export default function ProcessDetailPage() {
   return (
     <div className="space-y-space-2xl max-w-7xl mx-auto">
       {/* Breadcrumb & Meta */}
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col gap-4 lg:flex-row lg:justify-between lg:items-start">
         <div>
-          <div className="flex items-center space-x-2 text-sm text-on-surface-variant mb-4">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-on-surface-variant mb-3 md:mb-4">
             <Link to="/" className="hover:text-primary transition-colors">Roadmap</Link>
             <span className="material-symbols-outlined text-[16px]">chevron_right</span>
             <span>{process.department}</span>
-            <span className="material-symbols-outlined text-[16px]">chevron_right</span>
-            <span className="text-on-surface">{process.name}</span>
+            <span className="material-symbols-outlined text-[16px] hidden sm:inline">chevron_right</span>
+            <span className="text-on-surface hidden sm:inline">{process.name}</span>
             <span className="text-primary font-mono ml-2">#{process.rank}</span>
           </div>
-          <div className="flex items-center space-x-4">
-            <h1 className="text-3xl font-bold tracking-tight">{process.name}</h1>
+          <div className="flex flex-wrap items-center gap-2 lg:gap-4">
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{process.name}</h1>
             <RiskBadge riskClass={process.score.risk_decision} />
             <span className="text-xs font-mono bg-surface-container px-2 py-1 rounded text-on-surface-variant border border-outline-variant/30">FASTAPI_PID: {process.id.substring(0,8)}</span>
           </div>
         </div>
-        <div className="flex space-x-3">
+        <div className="flex flex-wrap gap-2 lg:space-x-3">
           <button 
             onClick={() => reevaluate.mutate(process.id)}
             disabled={reevaluate.isPending}
@@ -88,12 +88,12 @@ export default function ProcessDetailPage() {
         </div>
       </div>
 
-      <div className="bg-surface-container-low/50 rounded-2xl p-8 border border-outline-variant/30 mt-8 mb-12">
+      <div className="bg-surface-container-low/50 rounded-2xl p-4 md:p-8 border border-outline-variant/30 mt-6 mb-8 md:mt-8 md:mb-12">
         <MilestoneStepper currentStep={2} />
       </div>
 
-      <div className="grid grid-cols-12 gap-space-lg">
-        <div className="col-span-5">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+        <div className="lg:col-span-5">
           <ScoreGauge
             score={process.score.value_score}
             riskClass={process.score.risk_decision}
@@ -101,7 +101,7 @@ export default function ProcessDetailPage() {
             casesPerMonth={process.cases_per_month}
           />
         </div>
-        <div className="col-span-7">
+        <div className="lg:col-span-7">
           <FactorBars factors={factors} weights={weightsConfig?.weights || {}} />
         </div>
       </div>
