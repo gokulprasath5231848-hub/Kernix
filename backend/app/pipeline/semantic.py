@@ -30,6 +30,7 @@ from app.config import Settings
 
 logger = logging.getLogger(__name__)
 
+# Default endpoint; overridable per-deployment via settings.LLM_API_URL.
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 # Deterministic sensitivity policy. If any of these appear in a process's
@@ -196,7 +197,7 @@ async def analyse_process(
         try:
             async with httpx.AsyncClient() as client:
                 resp = await client.post(
-                    GROQ_URL, headers=headers, json=payload, timeout=timeout
+                    settings.LLM_API_URL or GROQ_URL, headers=headers, json=payload, timeout=timeout
                 )
                 resp.raise_for_status()
                 content = resp.json()["choices"][0]["message"]["content"]

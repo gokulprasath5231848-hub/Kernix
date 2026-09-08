@@ -11,6 +11,10 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql+asyncpg://kintix:kintix_secret@localhost:5432/kintix_db"
     GROQ_API_KEY: str = ""
     GROQ_MODEL: str = "openai/gpt-oss-120b"
+    # OpenAI-compatible chat/completions endpoint. Defaults to Groq. To use
+    # NVIDIA instead, set this to https://integrate.api.nvidia.com/v1/chat/completions
+    # and set GROQ_API_KEY / GROQ_MODEL to your NVIDIA key and model id.
+    LLM_API_URL: str = "https://api.groq.com/openai/v1/chat/completions"
     DEBUG: bool = False
     # Apply Alembic migrations on boot. Disable for test databases created
     # directly from ORM metadata.
