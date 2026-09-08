@@ -9,3 +9,9 @@ dist/
 !.env.example
 *.db
 .pytest_cache/
+
+# Build artifacts & packaging
+*.zip
+*.tsbuildinfo
+web/vite.config.js
+web/vite.config.d.ts
