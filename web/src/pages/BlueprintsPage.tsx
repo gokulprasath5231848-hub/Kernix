@@ -82,7 +82,7 @@ export default function BlueprintsPage() {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-space-md md:gap-4">
         <StatCard label="Total Processes" value={String(total)} icon="inventory_2" />
         <StatCard label="Blueprints Generated" value={String(generated)} icon="draw" accentColor="border-amber-400" />
         <StatCard label="Awaiting Approval" value={String(awaiting)} icon="pending_actions" accentColor="border-emerald-400" />
@@ -101,12 +101,13 @@ export default function BlueprintsPage() {
       )}
 
       {/* Filter chips */}
+      <div className="-mx-gutter-mobile px-gutter-mobile md:mx-0 md:px-0 overflow-x-auto">
       <div className="flex items-center space-x-2 bg-surface-container-low p-2 rounded-xl border border-outline-variant/30 w-fit">
         {filterOptions.map(opt => (
           <button
             key={opt.value}
             onClick={() => setStatusFilter(opt.value)}
-            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2 ${
+            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2 flex-none whitespace-nowrap ${
               statusFilter === opt.value
                 ? 'bg-primary text-on-primary'
                 : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container'
@@ -119,9 +120,10 @@ export default function BlueprintsPage() {
           </button>
         ))}
       </div>
+      </div>
 
-      {/* Table */}
-      <div className="bg-surface-container-low rounded-xl border border-outline-variant/30 overflow-x-auto">
+      {/* Table (desktop) */}
+      <div className="hidden md:block bg-surface-container-low rounded-xl border border-outline-variant/30 overflow-x-auto">
         {isLoading ? (
           <div className="p-12 flex justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>
         ) : isError ? (
@@ -232,6 +234,64 @@ export default function BlueprintsPage() {
               )}
             </tbody>
           </table>
+        )}
+      </div>
+
+      {/* Card list (mobile) */}
+      <div className="md:hidden flex flex-col gap-space-md">
+        {isLoading ? (
+          <div className="p-12 flex justify-center bg-surface-container-low rounded-xl border border-outline-variant/30"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>
+        ) : isError ? (
+          <div className="p-12 text-center text-error bg-surface-container-low rounded-xl border border-outline-variant/30">Failed to load blueprint catalog.</div>
+        ) : !filtered.length ? (
+          <div className="p-8 text-center text-on-surface-variant italic text-sm bg-surface-container-low rounded-xl border border-outline-variant/30">No processes match this filter.</div>
+        ) : (
+          filtered.map(item => {
+            const style = STATUS_STYLES[item.status] || STATUS_STYLES['Not Generated'];
+            const isGenerating = generatingId === item.process_id;
+            const isBlocked = item.status === 'Blocked';
+            return (
+              <div key={item.process_id} className="bg-surface-container-low rounded-xl border border-outline-variant/30 p-space-md flex flex-col gap-space-sm">
+                <div className="flex items-start justify-between gap-space-sm">
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-sm font-semibold text-on-surface leading-snug">{item.process_name}</span>
+                    <span className="text-xs text-on-surface-variant">{item.department || '—'}</span>
+                  </div>
+                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase border border-current/20 flex-none ${style.bg} ${style.text}`}>
+                    {item.status}
+                  </span>
+                </div>
+                <div className="flex items-center gap-space-md text-xs">
+                  <RiskBadge riskClass={item.risk_decision as RiskClass} />
+                  <span className="text-on-surface-variant">Score <span className="font-mono text-on-surface">{item.value_score.toFixed(1)}</span></span>
+                  <span className="text-on-surface-variant">Est <span className="font-mono text-on-surface">{item.estimated_savings_hours != null ? `${item.estimated_savings_hours.toFixed(1)}h` : '—'}</span></span>
+                </div>
+                <div className="flex items-center gap-2">
+                  {item.status === 'Not Generated' && (
+                    <button onClick={() => handleGenerate(item.process_id)} disabled={isBlocked || isGenerating}
+                      className="flex-1 text-xs font-semibold px-3 py-2 rounded-lg bg-primary text-on-primary hover:bg-primary/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1">
+                      {isGenerating ? (<><div className="animate-spin rounded-full h-3 w-3 border-b-2 border-on-primary" /><span>Generating…</span></>) : (<><span className="material-symbols-outlined text-[14px]">auto_awesome</span><span>Generate</span></>)}
+                    </button>
+                  )}
+                  {item.status === 'Draft' && (
+                    <>
+                      <button onClick={() => navigate(`/process/${item.process_id}/blueprint`)}
+                        className="flex-1 text-xs font-semibold px-3 py-2 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-on-surface transition-colors border border-outline-variant/30">View</button>
+                      <button onClick={() => handleSubmit(item.process_id)} disabled={submitMutation.isPending}
+                        className="flex-1 text-xs font-semibold px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-500 transition-colors disabled:opacity-40">Submit</button>
+                    </>
+                  )}
+                  {item.status === 'Awaiting Approval' && (
+                    <button onClick={() => navigate(`/process/${item.process_id}/blueprint`)}
+                      className="flex-1 text-xs font-semibold px-3 py-2 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-on-surface transition-colors border border-outline-variant/30">View Blueprint</button>
+                  )}
+                  {item.status === 'Blocked' && (
+                    <span className="flex-1 text-center text-xs text-on-surface-variant/50 italic py-2" title="Process is TOO_RISKY — blueprint generation is forbidden">Blocked — too risky to automate</span>
+                  )}
+                </div>
+              </div>
+            );
+          })
         )}
       </div>
     </div>

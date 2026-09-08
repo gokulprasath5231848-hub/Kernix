@@ -70,7 +70,7 @@ export default function ProcessIntelligencePage() {
       {intel && !loadingIntel && (
         <>
           {/* Stat cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-space-md md:gap-4">
             <StatCard label="Total Cases" value={String(intel.case_count)} icon="cases" />
             <StatCard label="Unique Activities" value={String(intel.nodes.length)} icon="account_tree" accentColor="border-amber-400" />
             <StatCard label="Path Variants" value={String(intel.variants.length)} icon="alt_route" accentColor="border-secondary" />
