@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { login, isAuthenticated } from '../auth';
 
 export default function LoginPage() {
@@ -10,9 +10,10 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // Already signed in → skip the login screen.
+  // Already signed in → skip the login screen (proper redirect, not a
+  // navigate() call during render).
   if (isAuthenticated()) {
-    navigate('/', { replace: true });
+    return <Navigate to="/" replace />;
   }
 
   async function handleSubmit(e: FormEvent) {
