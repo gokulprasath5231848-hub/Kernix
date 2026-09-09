@@ -98,6 +98,43 @@ export interface BlueprintCatalogItem {
 }
 
 // ---------------------------------------------------------------------------
+// Agentic execution
+// ---------------------------------------------------------------------------
+
+export type AgentStepType =
+  | 'plan'
+  | 'tool_call'
+  | 'observation'
+  | 'blocked'
+  | 'final';
+
+export type AgentRunStatus =
+  | 'COMPLETED'
+  | 'AWAITING_HUMAN_APPROVAL'
+  | 'REFUSED'
+  | 'FAILED'
+  | 'MAX_STEPS_REACHED';
+
+export interface AgentTraceStep {
+  seq: number;
+  type: AgentStepType;
+  tool: string | null;
+  args: Record<string, unknown> | null;
+  content: string;
+  blocked: boolean;
+}
+
+export interface AgentRunResult {
+  process_id: string;
+  process_name: string;
+  risk_decision: RiskClass;
+  engine: string;
+  status: AgentRunStatus;
+  summary: string;
+  trace: AgentTraceStep[];
+}
+
+// ---------------------------------------------------------------------------
 // Process Intelligence (process mining)
 // ---------------------------------------------------------------------------
 

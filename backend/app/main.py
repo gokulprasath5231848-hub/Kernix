@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.database import get_engine, get_sessionmaker, Base
-from app.api import health, processes, blueprints, ingestion, weights, audit, catalog, auth, admin
+from app.api import health, processes, blueprints, ingestion, weights, audit, catalog, auth, admin, agent
 from app.seed import seed_database
 from app.config import get_settings
 
@@ -82,6 +82,7 @@ app.include_router(auth.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
 app.include_router(processes.router, prefix="/api")
 app.include_router(blueprints.router, prefix="/api")
+app.include_router(agent.router, prefix="/api")
 app.include_router(ingestion.router, prefix="/api")
 app.include_router(weights.router, prefix="/api")
 app.include_router(audit.router, prefix="/api")

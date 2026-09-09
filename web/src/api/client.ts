@@ -1,4 +1,4 @@
-import { ProcessDetail, ProcessListItem, Blueprint, Score, WeightsConfig, AuditEntry, BlueprintCatalogItem, ProcessIntelligence } from '../types';
+import { ProcessDetail, ProcessListItem, Blueprint, Score, WeightsConfig, AuditEntry, BlueprintCatalogItem, ProcessIntelligence, AgentRunResult } from '../types';
 import { getToken } from '../auth';
 
 interface ProcessListResponse {
@@ -106,6 +106,12 @@ export const api = {
   // --- Process Intelligence ---
   getProcessIntelligence: (processId: string) =>
     fetchAPI<ProcessIntelligence>(`/api/processes/${processId}/intelligence`),
+  // --- Agentic execution ---
+  runAgent: (processId: string, engine: 'auto' | 'llm' | 'scripted' = 'auto') =>
+    fetchAPI<AgentRunResult>(
+      `/api/processes/${processId}/agent/run?engine=${engine}`,
+      { method: 'POST' }
+    ),
   // --- Admin: clear all ingested data (requires a valid session) ---
   resetAllData: () => {
     const token = getToken();
