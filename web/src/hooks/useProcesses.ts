@@ -85,6 +85,23 @@ export const useSubmitForApproval = () => {
 
 
 // ---------------------------------------------------------------------------
+// Agentic execution
+// ---------------------------------------------------------------------------
+
+export const useRunAgent = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ processId, engine }: { processId: string; engine?: 'auto' | 'llm' | 'scripted' }) =>
+      api.runAgent(processId, engine),
+    onSuccess: () => {
+      // A run writes to the audit trail; keep it fresh.
+      queryClient.invalidateQueries({ queryKey: ['audit'] });
+    },
+  });
+};
+
+
+// ---------------------------------------------------------------------------
 // Process Intelligence
 // ---------------------------------------------------------------------------
 

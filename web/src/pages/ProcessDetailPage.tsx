@@ -6,6 +6,7 @@ import FactorBars from '../components/score/FactorBars';
 import EvidenceTrail from '../components/score/EvidenceTrail';
 import MilestoneStepper from '../components/score/MilestoneStepper';
 import RiskBadge from '../components/roadmap/RiskBadge';
+import AgentConsole from '../components/agent/AgentConsole';
 
 export default function ProcessDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -126,6 +127,8 @@ export default function ProcessDetailPage() {
           ))}
         </div>
       </div>
+
+      <AgentConsole processId={process.id} riskClass={process.score.risk_decision} />
 
       <EvidenceTrail events={process.evidence_trail || []} />
     </div>
