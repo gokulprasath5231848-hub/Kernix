@@ -1,0 +1,17 @@
+# Netlify build config for the KINTIX monorepo.
+#
+# The frontend lives in web/, not the repo root. Without this file Netlify builds
+# from the root — where there is no package.json — and publishes an empty folder,
+# so every path (including /) returns Netlify's "Page not found". This pins the
+# build to web/ and publishes web/dist.
+#
+# Redirect rules (SPA fallback + /api proxy to the Render backend) live in
+# web/public/_redirects, which Vite copies into web/dist at build time.
+
+[build]
+  command = "cd web && npm install && npm run build"
+  publish = "web/dist"
+
+[build.environment]
+  # Vite needs a modern Node; pin it so local and Netlify builds match.
+  NODE_VERSION = "20"
