@@ -14,8 +14,6 @@ dependencies = [
     "pydantic-settings>=2.7.0",
     "alembic>=1.14.0",
     "httpx",
-    "greenlet",
-    "aiosqlite",
     "python-multipart",
     "numpy>=1.26",
     # scikit-learn stays in core: without it clustering silently collapses
