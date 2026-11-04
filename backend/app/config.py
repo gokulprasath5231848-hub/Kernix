@@ -65,7 +65,7 @@ class Settings(BaseSettings):
         if mode:
             return mode != "disable"
         host = (parts.hostname or "").lower()
-        return host not in {"localhost", "127.0.0.1", "::1", ""}
+        return host not in {"localhost", "127.0.0.1", "::1", "postgres", ""}
 
     @property
     def db_connect_args(self) -> dict:

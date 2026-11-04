@@ -32,7 +32,7 @@ export default function Sidebar() {
         </div>
         <div className="flex flex-col">
           <div className="flex text-xl tracking-wider font-bold">
-            <span className="text-white">KINTI</span>
+            <span className="text-on-surface">KINTI</span>
             <span className="text-primary">X</span>
           </div>
           <span className="text-[0.6rem] text-primary tracking-widest uppercase">Intelligent Automation, Human Control</span>

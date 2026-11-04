@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProcesses } from '../../hooks/useProcesses';
 import { logout } from '../../auth';
+import { applyTheme, getInitialTheme, type Theme } from '../../theme';
 
 export default function Header() {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
+  const [theme, setTheme] = useState<Theme>(getInitialTheme);
   const { data: processes } = useProcesses();
   const evaluatedCount = processes?.length ?? 0;
 
@@ -19,6 +21,12 @@ export default function Header() {
     navigate('/login', { replace: true });
   };
 
+  const toggleTheme = () => {
+    const nextTheme: Theme = theme === 'dark' ? 'light' : 'dark';
+    applyTheme(nextTheme);
+    setTheme(nextTheme);
+  };
+
   return (
     <header className="fixed top-0 left-0 md:left-72 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur border-b border-outline-variant/30 flex items-center justify-between px-gutter-mobile md:px-space-xl z-10">
       <div className="flex items-center space-x-3 min-w-0">
@@ -28,7 +36,7 @@ export default function Header() {
             <span className="text-primary font-bold text-lg leading-none">K</span>
           </div>
           <div className="flex text-lg tracking-wider font-bold">
-            <span className="text-white">KINTI</span><span className="text-primary">X</span>
+            <span className="text-on-surface">KINTI</span><span className="text-primary">X</span>
           </div>
         </div>
         {/* Desktop status chip */}
@@ -51,6 +59,14 @@ export default function Header() {
           <button className="relative text-on-surface-variant hover:text-on-surface transition-colors hidden sm:block" aria-label="Notifications">
             <span className="material-symbols-outlined">notifications</span>
             <span className="absolute top-0 right-0 w-2 h-2 bg-primary rounded-full ring-2 ring-surface-container-lowest"></span>
+          </button>
+          <button
+            onClick={toggleTheme}
+            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            className="text-on-surface-variant hover:text-primary transition-colors flex-none"
+          >
+            <span className="material-symbols-outlined">{theme === 'dark' ? 'light_mode' : 'dark_mode'}</span>
           </button>
           <div className="flex items-center space-x-3 cursor-pointer hover:bg-surface-container px-2 py-1 rounded-lg transition-colors">
             <div className="text-right hidden lg:block">

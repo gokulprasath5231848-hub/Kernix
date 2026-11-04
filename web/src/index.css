@@ -3,8 +3,96 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    color-scheme: dark;
+    --inverse-on-surface: 48 48 50;
+    --on-error: 105 0 5;
+    --primary: 236 194 70;
+    --on-surface-variant: 209 197 175;
+    --surface-container-high: 42 42 44;
+    --error-container: 147 0 10;
+    --surface-variant: 53 52 55;
+    --error: 255 180 171;
+    --on-surface: 228 226 228;
+    --on-secondary: 60 47 0;
+    --background: 19 19 21;
+    --on-error-container: 255 218 214;
+    --on-background: 228 226 228;
+    --on-secondary-container: 241 210 115;
+    --on-primary-container: 75 58 0;
+    --outline-variant: 77 70 53;
+    --secondary-container: 112 90 0;
+    --surface-container: 31 31 33;
+    --on-tertiary: 56 48 21;
+    --surface-container-lowest: 14 14 16;
+    --on-primary: 61 46 0;
+    --surface: 19 19 21;
+    --secondary-fixed-dim: 226 196 102;
+    --inverse-primary: 117 91 0;
+    --tertiary: 211 198 160;
+    --primary-fixed-dim: 236 194 70;
+    --surface-tint: 236 194 70;
+    --outline: 153 144 123;
+    --tertiary-container: 179 166 130;
+    --on-tertiary-container: 68 60 31;
+    --secondary: 226 196 102;
+    --surface-container-low: 27 27 29;
+    --inverse-surface: 228 226 228;
+    --surface-dim: 19 19 21;
+    --surface-bright: 57 57 59;
+    --primary-container: 201 162 39;
+    --surface-container-highest: 53 52 55;
+    --status-safe: 111 191 115;
+    --status-hitl: 201 162 39;
+    --status-risk: 217 112 95;
+  }
+
+  :root.light {
+    color-scheme: light;
+    --inverse-on-surface: 234 241 255;
+    --on-error: 255 255 255;
+    --primary: 0 74 198;
+    --on-surface-variant: 67 70 85;
+    --surface-container-high: 220 233 255;
+    --error-container: 255 218 214;
+    --surface-variant: 211 228 254;
+    --error: 225 29 72;
+    --on-surface: 11 28 48;
+    --on-secondary: 255 255 255;
+    --background: 248 249 255;
+    --on-error-container: 147 0 10;
+    --on-background: 11 28 48;
+    --on-secondary-container: 92 100 122;
+    --on-primary-container: 238 239 255;
+    --outline-variant: 195 198 215;
+    --secondary-container: 218 226 253;
+    --surface-container: 229 238 255;
+    --on-tertiary: 255 255 255;
+    --surface-container-lowest: 255 255 255;
+    --on-primary: 255 255 255;
+    --surface: 248 249 255;
+    --secondary-fixed-dim: 190 198 224;
+    --inverse-primary: 180 197 255;
+    --tertiary: 0 90 137;
+    --primary-fixed-dim: 180 197 255;
+    --surface-tint: 0 83 219;
+    --outline: 115 118 134;
+    --tertiary-container: 0 115 174;
+    --on-tertiary-container: 231 242 255;
+    --secondary: 86 94 116;
+    --surface-container-low: 239 244 255;
+    --inverse-surface: 33 49 69;
+    --surface-dim: 203 219 245;
+    --surface-bright: 248 249 255;
+    --primary-container: 37 99 235;
+    --surface-container-highest: 211 228 254;
+    --status-safe: 16 185 129;
+    --status-hitl: 217 119 6;
+    --status-risk: 225 29 72;
+  }
+
   html, body { margin: 0; padding: 0; }
-  body { overscroll-behavior: none; }
+  body { overscroll-behavior: none; background: rgb(var(--background)); color: rgb(var(--on-surface)); transition: background-color .2s ease, color .2s ease; }
   ::-webkit-scrollbar { display: none; }
 }
 
@@ -34,3 +122,85 @@
 .login-btn-gold:not(:disabled):active {
   transform: translateY(0);
 }
+
+/* --- Public Kintix command-center landing page --- */
+.welcome-page {
+  min-height: 100vh;
+  overflow: hidden;
+  position: relative;
+  color: #f4f4f0;
+  background: #070c19;
+  font-family: 'Geist', sans-serif;
+}
+.welcome-grid, .welcome-vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+.welcome-grid {
+  opacity: .75;
+  background-image: linear-gradient(rgba(132, 157, 198, .075) 1px, transparent 1px), linear-gradient(90deg, rgba(132, 157, 198, .075) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: linear-gradient(to bottom, #000, transparent 92%);
+}
+.welcome-vignette {
+  background: radial-gradient(circle at 51% 44%, transparent 0, rgba(7, 12, 25, .1) 38%, rgba(7, 12, 25, .9) 100%);
+}
+.welcome-header, .welcome-footer {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28px clamp(24px, 6vw, 92px);
+}
+.welcome-brand { display: flex; align-items: center; gap: 12px; color: #fff; text-decoration: none; }
+.welcome-brand-mark {
+  display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid rgba(236, 194, 70, .7);
+  color: #ecc246; font-family: monospace; font-size: 20px; box-shadow: 0 0 20px rgba(236, 194, 70, .2);
+}
+.welcome-brand strong { display: block; letter-spacing: .2em; font-size: 16px; }
+.welcome-brand strong span { color: #ecc246; }
+.welcome-brand small { display: block; margin-top: 4px; color: #8c99b0; font: 9px monospace; letter-spacing: .12em; text-transform: uppercase; }
+.welcome-login-link { color: #c1cada; font: 11px monospace; letter-spacing: .1em; text-decoration: none; text-transform: uppercase; }
+.welcome-login-link:hover { color: #ecc246; }
+.welcome-hero { position: relative; z-index: 1; display: flex; align-items: center; min-height: 650px; max-width: 1320px; margin: 0 auto; padding: 20px clamp(24px, 6vw, 92px); }
+.welcome-copy { width: 51%; z-index: 1; }
+.welcome-eyebrow { color: #8d9bb3; font: 10px monospace; letter-spacing: .16em; text-transform: uppercase; }
+.welcome-eyebrow span { display: inline-block; width: 24px; height: 1px; margin: 0 10px 3px 0; background: #ecc246; }
+.welcome-copy h1 { margin: 25px 0 22px; font-size: clamp(42px, 5.5vw, 78px); line-height: .98; letter-spacing: -.055em; }
+.welcome-copy h1 em { color: #ecc246; font-style: normal; }
+.welcome-description { max-width: 430px; color: #aab5c6; font-size: 16px; line-height: 1.7; }
+.welcome-actions { display: flex; flex-wrap: wrap; gap: 24px; margin-top: 36px; align-items: center; }
+.welcome-primary-action, .welcome-secondary-action { text-decoration: none; font: 11px monospace; letter-spacing: .08em; text-transform: uppercase; }
+.welcome-primary-action { padding: 15px 19px; color: #111521; background: #ecc246; box-shadow: 0 0 28px rgba(236, 194, 70, .2); }
+.welcome-primary-action:hover { background: #f4d56b; }
+.welcome-primary-action span { margin-left: 18px; font-size: 18px; }
+.welcome-secondary-action { color: #aab5c6; }
+.welcome-secondary-action:hover { color: #ecc246; }
+.welcome-secondary-action span { margin-left: 10px; color: #ecc246; }
+.welcome-radar { position: absolute; right: 3%; width: min(56vw, 650px); aspect-ratio: 1; }
+.welcome-radar-ring { position: absolute; inset: 8%; border: 1px solid rgba(148, 169, 207, .28); border-radius: 50%; }
+.welcome-radar-ring::after { content: ''; position: absolute; inset: 7%; border: 1px dashed rgba(148, 169, 207, .22); border-radius: 50%; }
+.welcome-radar-ring-outer { inset: 0; border-style: dashed; animation: welcome-spin 38s linear infinite; }
+.welcome-radar-ring-middle { inset: 14%; animation: welcome-spin-reverse 28s linear infinite; }
+.welcome-radar-ring-inner { inset: 27%; border-color: rgba(236, 194, 70, .35); }
+.welcome-radar-ticks { position: absolute; inset: 3%; border-radius: 50%; background: repeating-conic-gradient(from 0deg, rgba(183, 199, 228, .7) 0deg 1deg, transparent 1deg 29deg); mask: radial-gradient(transparent 0 91%, #000 91% 92%, transparent 92%); }
+.welcome-radar-sweep { position: absolute; inset: 4%; border-radius: 50%; background: conic-gradient(from 0deg, transparent 0 82%, rgba(236, 194, 70, .3), transparent 90%); animation: welcome-spin 9s linear infinite; }
+.welcome-orbit-label { position: absolute; color: #8493ad; font: 9px monospace; letter-spacing: .1em; }
+.welcome-orbit-label-north { top: 1%; left: 48%; }.welcome-orbit-label-east { top: 49%; right: 1%; }.welcome-orbit-label-south { bottom: 1%; left: 48%; }.welcome-orbit-label-west { top: 49%; left: 1%; }
+.welcome-core { position: absolute; inset: 31%; display: grid; place-items: center; align-content: center; border: 1px solid rgba(236, 194, 70, .45); border-radius: 50%; background: rgba(8, 14, 29, .5); box-shadow: inset 0 0 40px rgba(236, 194, 70, .08), 0 0 45px rgba(20, 75, 150, .18); cursor: grab; perspective: 700px; transform-style: preserve-3d; touch-action: none; transition: box-shadow .25s ease; }
+.welcome-core:focus-visible { outline: 2px solid #ecc246; outline-offset: 6px; }
+.welcome-core-dragging { cursor: grabbing; box-shadow: inset 0 0 55px rgba(236, 194, 70, .18), 0 0 65px rgba(236, 194, 70, .28); }
+.welcome-core-glow { position: absolute; width: 42%; height: 42%; border-radius: 50%; background: rgba(236, 194, 70, .1); filter: blur(20px); }
+.welcome-core svg { position: relative; width: 58%; height: 63%; overflow: visible; fill: none; stroke: #f5f3eb; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.2; filter: drop-shadow(0 0 7px rgba(255, 255, 255, .45)); transform: translateZ(18px); }
+.welcome-core-hexagon { stroke: rgba(236, 194, 70, .7); stroke-width: 1; stroke-dasharray: 3 4; }
+.welcome-core span { position: relative; margin-top: 12px; color: #8b99af; text-align: center; font: 8px monospace; letter-spacing: .2em; line-height: 1.6; }
+.welcome-capabilities { position: relative; z-index: 2; max-width: 1320px; margin: 0 auto; padding: 40px clamp(24px, 6vw, 92px) 120px; }
+.welcome-capability-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 24px; }
+.welcome-capability-grid article { padding: 24px; border: 1px solid rgba(141, 158, 191, .2); background: rgba(11, 19, 37, .55); }
+.welcome-capability-grid b { color: #ecc246; font: 11px monospace; }.welcome-capability-grid h2 { margin: 30px 0 10px; font-size: 20px; }.welcome-capability-grid p { margin: 0; color: #8d9bb3; font-size: 13px; line-height: 1.6; }
+.welcome-footer { color: #6f7e98; font: 10px monospace; letter-spacing: .12em; text-transform: uppercase; }.welcome-footer i { display: inline-block; width: 6px; height: 6px; margin-right: 8px; border-radius: 50%; background: #70bf73; box-shadow: 0 0 8px #70bf73; }
+@keyframes welcome-spin { to { transform: rotate(360deg); } }
+@keyframes welcome-spin-reverse { to { transform: rotate(-360deg); } }
+@media (max-width: 800px) { .welcome-hero { display: block; min-height: 820px; padding-top: 70px; }.welcome-copy { width: 100%; }.welcome-radar { top: 390px; right: 8%; width: 84vw; }.welcome-capability-grid { grid-template-columns: 1fr; }.welcome-header { padding: 20px 24px; }.welcome-brand small { display: none; } }

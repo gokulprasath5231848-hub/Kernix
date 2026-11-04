@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { login, isAuthenticated } from '../auth';
 
 export default function LoginPage() {
@@ -186,7 +186,12 @@ export default function LoginPage() {
       <footer className="relative z-10 w-full py-4 px-6 md:px-12 border-t border-zinc-900/90 bg-[#070709]/80 backdrop-blur">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-zinc-500">
           <span>KINTIX © 2025 Sovereign Autonomous Systems Inc.</span>
-          <span className="font-mono text-[11px]">Governance Console</span>
+          <div className="flex items-center gap-4">
+            <Link to="/welcome" className="font-mono text-[11px] hover:text-[#ECC246] transition-colors">
+              Platform overview
+            </Link>
+            <span className="font-mono text-[11px]">Governance Console</span>
+          </div>
         </div>
       </footer>
     </div>

@@ -9,8 +9,13 @@ import SettingsPage from './pages/SettingsPage';
 import AuditPage from './pages/AuditPage';
 import BlueprintsPage from './pages/BlueprintsPage';
 import ProcessIntelligencePage from './pages/ProcessIntelligencePage';
+import WelcomePage from './pages/WelcomePage';
 
 const router = createBrowserRouter([
+  {
+    path: '/welcome',
+    element: <WelcomePage />,
+  },
   {
     path: '/login',
     element: <LoginPage />,
